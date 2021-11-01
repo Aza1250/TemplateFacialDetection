@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap and jQuery mobile CSS -->
+    <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+
+    <title>Template-based Face Recognition</title>
+</head>
+
+<body>
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
+        integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"
+        integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+        crossorigin="anonymous"></script>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">A Project by Aziz Zaynutdinov </a>
+        </div>
+    </nav>
+
+    <!-- Display dismissible messages depending on user's actions -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert {{ category }} alert-dismissible show fade" style="margin-bottom: 0;">
+        {{ message|capitalize }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="jumbotron">
+        <h1 class="display-4">Welcome!</h1>
+        <p class="lead">Presented is a demo of a template-based facial recognition algorithm.
+            These algorithms were one of the first attempts at facial-recognition.
+            The algorithm presented utilizes Normalized Cross-Correlation (NCC) between the template and a given image,
+            to find regions above a certain threshold level.</p>
+        <hr class="my-4">
+        <p>For interactivity, below you can change the parameters of the algorirthms.</p>
+    </div>
+
+    <!-- Upload image part of the webpage -->
+    <div class="container" style="width: 75%; margin-top: 30px;">
+        <div class="form-group">
+            <form action="/" method="POST" enctype="multipart/form-data">
+                <div class="row" style="margin-bottom: 20px;">
+                    <div class="column">
+                        <h1> Upload Image </h1>
+                        <hr>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" name="image" id="image">
+                            <label class="custom-file-label" for="image">Select image...</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="column" style="margin-right: 50px;">
+                        <div class="card" style="width: 18rem; height: 15rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">Scale</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">Double in ranges 0.25 to 1.0</h6>
+                                <p class="card-text">Control the steps that the Gaussian pyramid takes in building the
+                                    scaled representations of the image.</p>
+                                <input name="scale" type="number" class="form-control" id="scale" step="0.01" min="0.25"
+                                    max="1.0" style="position: absolute; bottom: 15px; width: 80%;" placeholder="0.75">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="column">
+                        <div class="card" style="width: 18rem; height: 15rem;">
+                            <div class="card-body">
+                                <h5 class="card-title">Threshold</h5>
+                                <h6 class="card-subtitle mb-2 text-muted">Double in ranges 0.0 to 1.0</h6>
+                                <p class="card-text">Determine the level at which the value returned by NCC is
+                                    considered significant enough.</p>
+                                <input name="threshold" type="number" class="form-control" id="threshold" step="0.01"
+                                    min="0.0" max="1.0" style="position: absolute; bottom: 15px; width: 80%;"
+                                    placeholder="0.58">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="column">
+                        <button type="submit" class="btn btn-primary"
+                            style="margin-top: 10px;">Submit</button>
+                        <script>
+                            $('#image').on('change', function () {
+                                //get the uploaded file name
+                                fileName = document.getElementById("image").files[0].name;
+                                //replace the "Select image..." label
+                                $(this).next('.custom-file-label').html(fileName);
+                            })
+                        </script>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Display the uploaded image and the face-recognition image side-by-side to the user -->
+    <div class="container" style="width: 75%; margin-bottom: 50px;">
+        <div class="row">
+            <div class="col-sm" style="padding-left: 0px;">
+                <img src="/static/{{ image_path }}" alt="User Image" class="img-thumbnail float-left"
+                    style="margin: auto;">
+            </div>
+            <div class="col-sm">
+                <img src="/static/{{ detected_faces_image_path }}" alt="User Image" class="img-thumbnail float-left"
+                    style="margin: auto;">
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
